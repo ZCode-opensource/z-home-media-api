@@ -1,24 +1,35 @@
-const { MongoClient } = require("mongodb");
+import {MongoClient} from 'mongodb';
 
-const uri = "mongodb://localhost:27017/?readPreference=primary&ssl=false";
+const uri = 'mongodb://localhost:27017/?readPreference=primary&ssl=false';
 
 const client = new MongoClient(uri);
 
 let dbConnection: any;
 
-export function connectToServer (callback: any) {
-  client.connect(function (err: undefined, db: { db: (arg0: string) => any; }) {
+/**
+ * @param {Function} callback callback function
+ * @returns {any} Callback
+ */
+function connectToServer(callback: Function): any {
+  client.connect((err, db) => {
     if (err || !db) {
       return callback(err);
     }
 
-    dbConnection = db.db("zHomeMedia");
-    console.log("Successfully connected to MongoDB.");
+    dbConnection = db.db('zHomeMedia');
+    console.log('Successfully connected to MongoDB.');
 
     return callback();
   });
+
+  return null;
 }
 
-export function getDb () {
+/**
+ * @returns {any} Database connection object
+ */
+function getDb(): any {
   return dbConnection;
 }
+
+export {connectToServer, getDb};

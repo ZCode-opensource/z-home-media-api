@@ -1,6 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import {Request, Response, NextFunction} from 'express';
 
-function requireAuth (req: Request, res: Response, next: NextFunction) {
+/**
+ *
+ * @param {Request} req Request object
+ * @param {Response} res Response object
+ * @param {NextFunction} next NextFunction
+ */
+function requireAuth(req: Request, res: Response, next: NextFunction) {
   // console.log(req.path);
   // console.log(req.session);
 
@@ -12,7 +18,7 @@ function requireAuth (req: Request, res: Response, next: NextFunction) {
     }
   }
 
-  next()
+  next();
 }
 
 export default requireAuth;

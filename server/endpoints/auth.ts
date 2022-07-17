@@ -1,22 +1,22 @@
+import 'dotenv/config';
 import express from 'express';
-import { getDb } from '../db/mongo';
-import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import {getDb} from '../db/mongo.js';
 
-dotenv.config();
-
+/* eslint new-cap: ["error", { "capIsNewExceptions": ["Router"] }] */
 const auth = express.Router();
 // const saltRounds = Number(process.env.SALT_ROUNDS);
 
 declare module 'express-session' {
+  // eslint-disable-next-line no-unused-vars
   interface SessionData {
     userId: string;
     user: string;
   }
 }
 
-auth.post('/', function (req, res) {
-  const { user, password, remember } = req.body;
+auth.post('/', function(req, res) {
+  const {user, password} = req.body;
 
   if (
     user !== undefined &&
@@ -27,29 +27,29 @@ auth.post('/', function (req, res) {
     const db = getDb();
 
     db.collection('users')
-      .findOne({ username: user })
-      .then((dbResult: any) => {
-        if (dbResult !== null) {
-          bcrypt.compare(
-            password,
-            dbResult.password,
-            function (_err, authResult) {
-              if (authResult) {
-                req.session.userId = dbResult._id;
-                req.session.user = dbResult.username;
-                res.json({ user: dbResult.username });
-                return;
-              }
+        .findOne({username: user})
+        .then((dbResult: any) => {
+          if (dbResult !== null) {
+            bcrypt.compare(
+                password,
+                dbResult.password,
+                function(_err, authResult) {
+                  if (authResult) {
+                    req.session.userId = dbResult._id;
+                    req.session.user = dbResult.username;
+                    res.json({user: dbResult.username});
+                    return;
+                  }
 
-              res.status(400).send('Invalid credentials');
-            }
-          );
+                  res.status(400).send('Invalid credentials');
+                },
+            );
 
-          return;
-        }
+            return;
+          }
 
-        res.status(400).send('Invalid credentials');
-      });
+          res.status(400).send('Invalid credentials');
+        });
 
     return;
   }
@@ -57,13 +57,13 @@ auth.post('/', function (req, res) {
   res.status(400).send('Invalid credentials');
 });
 
-auth.get('/logout', function (req, res) {
+auth.get('/logout', function(req, res) {
   req.session.destroy(() => {
     res.sendStatus(200);
   });
 });
 
-auth.get('/info', function (req, res) {
+auth.get('/info', function(req, res) {
   if (req.session.userId === undefined) {
     res.status(400).send('Invalid credentials');
     return;

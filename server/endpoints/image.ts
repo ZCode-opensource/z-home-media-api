@@ -1,14 +1,15 @@
 import express from 'express';
 import fs from 'fs';
 
+/* eslint new-cap: ["error", { "capIsNewExceptions": ["Router"] }] */
 const image = express.Router();
 
-image.get('/image/:imageId', function (req, res) {
+image.get('/image/:imageId', function(req, res) {
   const imageId = parseInt(req.params.imageId);
-  let filename = imageId + '.jpg';
+  const filename = imageId + '.jpg';
 
-  var img = fs.readFileSync('store/images/files/' + filename);
-  res.writeHead(200, { 'Content-Type': 'image/jpg' });
+  const img = fs.readFileSync('store/images/files/' + filename);
+  res.writeHead(200, {'Content-Type': 'image/jpg'});
   res.end(img, 'binary');
 });
 
