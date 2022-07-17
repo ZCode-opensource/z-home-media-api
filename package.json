@@ -2,8 +2,10 @@
   "name": "z-home-media-server-api",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
-    "start": "nodemon server/server.ts"
+    "build": "npx tsc",
+    "start": "nodemon --config nodemon.json server/server.ts"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
@@ -12,6 +14,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "express-fileupload": "^1.4.0",
     "express-session": "^1.17.3",
     "mongodb": "4.7",
     "redis": "^4.1.1"
@@ -21,10 +24,17 @@
     "@types/connect-redis": "^0.0.18",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.12",
+    "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.13",
+    "@types/express-fileupload": "^1.2.2",
     "@types/express-session": "^1.17.4",
     "@types/mongodb": "^4.0.7",
     "@types/node": "^18.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
+    "@typescript-eslint/parser": "^5.30.6",
+    "eslint": "^8.20.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-jsdoc": "^39.3.3",
     "nodemon": "^2.0.16",
     "ts-node": "^10.8.1",
     "typescript": "^4.7.4"
