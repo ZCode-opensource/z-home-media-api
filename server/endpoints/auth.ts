@@ -12,6 +12,7 @@ declare module 'express-session' {
   interface SessionData {
     userId: string;
     user: string;
+    profile: number;
   }
 }
 
@@ -37,7 +38,13 @@ auth.post('/', function(req, res) {
                   if (authResult) {
                     req.session.userId = dbResult._id;
                     req.session.user = dbResult.username;
-                    res.json({user: dbResult.username});
+                    req.session.profile = dbResult.profile;
+                    res.json(
+                        {
+                          user: dbResult.username,
+                          profile: dbResult.profile,
+                        },
+                    );
                     return;
                   }
 
@@ -69,7 +76,7 @@ auth.get('/info', function(req, res) {
     return;
   }
 
-  res.json({user: req.session.user});
+  res.json({user: req.session.user, profile: req.session.profile});
 });
 
 export default auth;
