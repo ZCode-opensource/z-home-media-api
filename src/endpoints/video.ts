@@ -92,7 +92,6 @@ video.post('/upload', function(req, res) {
 
       const relPath = `/${year}/${month}/${day}`;
 
-      /** Insert video in database */
       const db = getDb();
 
       video.mv(tempDir + '/' + video.name).then(() => {

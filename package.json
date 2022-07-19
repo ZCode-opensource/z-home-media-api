@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "npx tsc",
-    "start": "nodemon --config nodemon.json server/server.ts"
+    "start": "nodemon --config nodemon.json src/server.ts"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

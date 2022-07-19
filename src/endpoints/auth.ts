@@ -7,15 +7,6 @@ import {getDb} from '../db/mongo.js';
 const auth = express.Router();
 // const saltRounds = Number(process.env.SALT_ROUNDS);
 
-declare module 'express-session' {
-  // eslint-disable-next-line no-unused-vars
-  interface SessionData {
-    userId: string;
-    user: string;
-    profile: number;
-  }
-}
-
 auth.post('/', function(req, res) {
   const {user, password} = req.body;
 
@@ -36,7 +27,10 @@ auth.post('/', function(req, res) {
                 dbResult.password,
                 function(_err, authResult) {
                   if (authResult) {
-                    req.session.userId = dbResult._id;
+                    // console.log(dbResult);
+                    // console.log(req.session);
+
+                    req.session.userId = dbResult._id.toString();
                     req.session.user = dbResult.username;
                     req.session.profile = dbResult.profile;
                     res.json(
