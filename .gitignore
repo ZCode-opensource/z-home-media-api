@@ -2,3 +2,5 @@
 node_modules/
 store/
 dist/
+
+.directory
