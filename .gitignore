@@ -4,3 +4,4 @@ store/
 dist/
 
 .directory
+.env
