@@ -1,35 +1,38 @@
 import {MongoClient} from 'mongodb';
+import env from '..//utils/env.js';
+import logger from '../utils/logger.js';
 
-const uri = 'mongodb://localhost:27017/?readPreference=primary&ssl=false';
+const uri = `mongodb://${env.MONGO_USER}:${env.MONGO_PASSWORD}@${env.MONGO_HOST}:${env.MONGO_PORT}/`;
 
 const client = new MongoClient(uri);
 
-let dbConnection: any;
+let database: any;
 
 /**
- * @param {Function} callback callback function
- * @returns {any} Callback
+ * Connects to mongodb server
  */
-function connectToServer(callback: Function): any {
-  client.connect((err, db) => {
-    if (err || !db) {
-      return callback(err);
-    }
-
-    dbConnection = db.db('zHomeMedia');
-    console.log('Successfully connected to MongoDB.');
-
-    return callback();
-  });
-
-  return null;
+async function connect() {
+  try {
+    const connection = await client.connect();
+    database = connection.db('zHomeMedia');
+    logger.info('Connected to mongodb');
+  } catch (e) {
+    logger.error(`Couldn't connect to database ${e}`);
+  }
 }
 
 /**
  * @returns {any} Database connection object
  */
 function getDb(): any {
-  return dbConnection;
+  return database;
 }
 
-export {connectToServer, getDb};
+/**
+ * Disconnects from mongodb server
+ */
+async function disconnect() {
+  await client.close();
+}
+
+export {connect, disconnect, getDb};

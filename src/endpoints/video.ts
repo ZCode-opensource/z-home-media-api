@@ -5,6 +5,7 @@ import fs from 'fs';
 import {spawn} from 'child_process';
 import {ObjectId} from 'mongodb';
 import {getDb} from '../db/mongo.js';
+import logger from '../utils/logger.js';
 
 /* eslint new-cap: ["error", { "capIsNewExceptions": ["Router"] }] */
 const video = express.Router();
@@ -36,7 +37,7 @@ video.get('/:videoId', function(req, res) {
       .findOne({_id: new ObjectId(videoId)})
       .then((result: any) => {
         const videoPath =
-        `${process.env.STORAGE}/videos${result.path}/videos/${videoId}`;
+          `${process.env.STORAGE}/videos${result.path}/videos/${videoId}`;
 
         const videoSize = fs.statSync(videoPath).size;
         const CHUNK_SIZE = 10 ** 6;
@@ -77,20 +78,28 @@ video.post('/upload', function(req, res) {
       const year = timestamp.getUTCFullYear();
       const month = timestamp.getUTCMonth() + 1;
       const day = timestamp.getUTCDate();
-      let path = `${process.env.STORAGE}/videos/${year}`;
+      // let path = `${process.env.STORAGE}/videos/${year}`;
 
+      /*
       if (!fs.existsSync(path)) fs.mkdirSync(path);
       path += `/${month}`;
       if (!fs.existsSync(path)) fs.mkdirSync(path);
       path += `/${day}`;
       if (!fs.existsSync(path)) fs.mkdirSync(path);
 
-      /* Videos directory */
+      Videos directory
       if (!fs.existsSync(path + '/videos')) fs.mkdirSync(path + '/videos');
-      /* Thumbs directory */
+      Thumbs directory
       if (!fs.existsSync(path + '/thumbs')) fs.mkdirSync(path + '/thumbs');
+      */
 
       const relPath = `/${year}/${month}/${day}`;
+      const path = `${process.env.STORAGE}/videos${relPath}`;
+
+      if (!fs.existsSync(path + '/videos')) {
+        fs.mkdirSync(path + '/videos', {recursive: true});
+      }
+      if (!fs.existsSync(path + '/thumbs')) fs.mkdirSync(path + '/thumbs');
 
       const db = getDb();
 
@@ -161,7 +170,7 @@ function encodeVideo(
     videoId: string,
     path: string,
 ) {
-  console.log('encoding video...');
+  logger.debug('encoding video...');
   const args = [
     '-y',
     '-i',
@@ -183,17 +192,16 @@ function encodeVideo(
 
   const proc = spawn(process.env.FFMPEG as string, args);
 
-  proc.stdout.on('data', function(data) {
-    // console.log(data);
+  proc.stdout.on('data', function(_data) {
   });
 
   proc.stderr.setEncoding('utf8');
   proc.stderr.on('data', function(data) {
-    console.log(data);
+    logger.error(data);
   });
 
   proc.on('close', function() {
-    console.log('encoding finished');
+    logger.debug('encoding finished');
 
     fs.unlink(tempDir + '/' + filename, (err) => {
       if (err) {
@@ -201,7 +209,7 @@ function encodeVideo(
         return;
       }
 
-      console.log('Temp file removed');
+      logger.debug('Temp file removed');
       createThumbnail(videoId, path);
     });
   });
@@ -213,7 +221,7 @@ function encodeVideo(
  * @param {string} path path where to store thumbnail
  */
 function createThumbnail(videoId: string, path: string) {
-  console.log('creating thumbnail');
+  logger.debug('creating thumbnail');
 
   const args = [
     '-y',
@@ -233,16 +241,15 @@ function createThumbnail(videoId: string, path: string) {
   const proc = spawn(process.env.FFMPEG as string, args);
 
   proc.stdout.on('data', function(data) {
-    console.log(data);
+    console.debug(data);
   });
 
   proc.stderr.setEncoding('utf8');
-  proc.stderr.on('data', function(data) {
-    console.log(data);
+  proc.stderr.on('data', function(_data) {
   });
 
   proc.on('close', function() {
-    console.log('thumbnail created');
+    console.debug('thumbnail created');
 
     const db = getDb();
 
@@ -256,7 +263,7 @@ function createThumbnail(videoId: string, path: string) {
             },
         )
         .then(() => {
-          console.log('Status changed to 2');
+          console.debug('Status changed to 2');
         });
   });
 }

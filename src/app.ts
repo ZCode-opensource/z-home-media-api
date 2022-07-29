@@ -11,6 +11,9 @@ import video from './endpoints/video.js';
 import videos from './endpoints/videos.js';
 import image from './endpoints/image.js';
 import requireAuth from './middleware/requireAuth.js';
+import logger from './utils/logger.js';
+
+let isDevelopment = false;
 
 const app = express();
 
@@ -21,12 +24,20 @@ const options: cors.CorsOptions = {
 };
 
 const RedisStore = connectRedis(session);
-const redisClient = createClient({legacyMode: true});
+const redisClient = createClient({
+  legacyMode: true,
+  url: `redis://${env.REDIS_SERVER}:${env.REDIS_PORT}`,
+});
+
+if (env.DEVELOPMENT === 'true') {
+  isDevelopment = true;
+  logger.info('Development mode');
+}
 
 redisClient.connect().then(() => {
-  console.log('Successfully connected to redis.');
+  logger.info('Successfully connected to redis.');
 }).catch((_error:any) => {
-  console.log('Failed to connect to redis, server not running...');
+  logger.error('Failed to connect to redis, server not running');
   process.exitCode = 1;
   process.exit();
 });
@@ -34,12 +45,12 @@ redisClient.connect().then(() => {
 app.use(cors(options));
 app.use(cookieParser());
 app.use(session({
-  store: new RedisStore({client: redisClient}),
+  store: new RedisStore({client: redisClient, unref: true}),
   secret: env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Change in production
+    secure: isDevelopment ? false : true,
     httpOnly: true,
   },
 }));
@@ -56,3 +67,4 @@ app.use('/api/videos', videos);
 app.use('/api/image', image);
 
 export default app;
+export {redisClient};

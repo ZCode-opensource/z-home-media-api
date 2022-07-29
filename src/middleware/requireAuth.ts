@@ -1,4 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
+import logger from '../utils/logger.js';
 
 /**
  *
@@ -9,7 +10,7 @@ import {Request, Response, NextFunction} from 'express';
 function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (req.path !== '/api/auth') {
     if (req.session === undefined || req.session.userId === undefined) {
-      console.log('Bloqued request!');
+      logger.info('Bloqued request:' + req.ip);
       res.status(400).send('Invalid user');
       return;
     }

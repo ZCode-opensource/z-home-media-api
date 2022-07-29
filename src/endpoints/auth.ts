@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import bcrypt from 'bcrypt';
-import {getDb} from '../db/mongo.js';
+import * as mongodb from '../db/mongo.js';
 
 /* eslint new-cap: ["error", { "capIsNewExceptions": ["Router"] }] */
 const auth = express.Router();
@@ -16,7 +16,7 @@ auth.post('/', function(req, res) {
     password !== undefined &&
     password.length > 0
   ) {
-    const db = getDb();
+    const db = mongodb.getDb();
 
     db.collection('users')
         .findOne({username: user})
@@ -27,9 +27,6 @@ auth.post('/', function(req, res) {
                 dbResult.password,
                 function(_err, authResult) {
                   if (authResult) {
-                    // console.log(dbResult);
-                    // console.log(req.session);
-
                     req.session.userId = dbResult._id.toString();
                     req.session.user = dbResult.username;
                     req.session.profile = dbResult.profile;

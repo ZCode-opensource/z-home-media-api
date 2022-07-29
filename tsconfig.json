@@ -5,6 +5,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ES2022",
+    "types": ["node", "jest"],
     "moduleResolution": "node",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -15,5 +16,5 @@
     "noImplicitAny": true,
   },
   "include": [ "./src/**/*" ],
-  "exclude": ["./node_modules", "**/node_modules/*"],
+  "exclude": ["./node_modules", "**/node_modules/*", "./initdb"],
 }
