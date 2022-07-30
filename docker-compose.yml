@@ -9,7 +9,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: zHomeMedia
     volumes:
-      - ${MONGO_DATA_DIR}:/data/db
       - ./initdb:/docker-entrypoint-initdb.d
   redis:
     image: "redis:alpine"
