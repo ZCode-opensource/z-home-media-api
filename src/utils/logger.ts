@@ -24,4 +24,6 @@ if (env.DEVELOPMENT === 'true') {
   });
 }
 
+log.level = env.LOG_LEVEL;
+
 export default log;
