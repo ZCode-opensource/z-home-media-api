@@ -5,6 +5,8 @@ services:
     command: mongod --quiet --logpath /var/log/mongodb/mongodb.log
     ports:
       - 27017:27017
+    volumes:
+      - ${MONGO_DATA_DIR}:/data/db
   api:
       environment:
         DEVELOPMENT: true
