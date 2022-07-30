@@ -19,6 +19,8 @@ services:
     environment:
       DEVELOPMENT: false
       MONGO_HOST: mongo
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
       REDIS_SERVER: redis
       STORAGE: /storage
     volumes:
@@ -26,6 +28,21 @@ services:
     command: yarn start
     ports:
       - ${PORT}:${PORT}
+    depends_on:
+      - mongo
+      - redis
+  api-tests:
+    build: .
+    image: zhomemedia
+    environment:
+      DEVELOPMENT: true
+      MONGO_HOST: mongo
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      REDIS_SERVER: redis
+    command: dockerize
+        -wait tcp://mongo:27017 -wait tcp://redis:6379 -timeout 10s
+        sh -c "yarn test"
     depends_on:
       - mongo
       - redis
