@@ -22,6 +22,7 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       REDIS_SERVER: redis
       STORAGE: /storage
+      LOG_LEVEL: ${LOG_LEVEL}
     volumes:
       - ${STORAGE}:/storage
     command: yarn start
@@ -39,6 +40,7 @@ services:
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       REDIS_SERVER: redis
+      LOG_LEVEL: ${LOG_LEVEL}
     command: dockerize
         -wait tcp://mongo:27017 -wait tcp://redis:6379 -timeout 10s
         sh -c "yarn test"

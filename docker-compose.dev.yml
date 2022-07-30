@@ -10,5 +10,6 @@ services:
   api:
       environment:
         DEVELOPMENT: true
+        LOG_LEVEL: debug
       volumes:
         - ./:/~/zhomemedia
