@@ -1,3 +1,3 @@
-# zHomeMedia API [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ZCode-opensource/z-home-media-api/blob/main/LICENSE)
+# zHomeMedia API [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ZCode-opensource/z-home-media-api/blob/main/LICENSE) [![CircleCI](https://dl.circleci.com/status-badge/img/gh/ZCode-opensource/z-home-media-api/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/ZCode-opensource/z-home-media-api/tree/main)
 
 Api for the zHomeMedia web application
