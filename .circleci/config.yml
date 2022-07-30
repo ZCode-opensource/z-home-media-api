@@ -11,4 +11,4 @@ jobs:
       - setup_remote_docker:
           version: 20.10.14
       - run: |
-            docker-compose up --build --abort-on-container-exit api-tests
+            docker-compose up --build --abort-on-container-exit mongo api-tests

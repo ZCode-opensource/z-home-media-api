@@ -3,7 +3,6 @@ import env from '..//utils/env.js';
 import logger from '../utils/logger.js';
 
 const uri = `mongodb://${env.MONGO_USER}:${env.MONGO_PASSWORD}@${env.MONGO_HOST}:${env.MONGO_PORT}/`;
-logger.debug(`Connecting to mongodb with ${uri}`);
 
 const client = new MongoClient(uri);
 
@@ -13,6 +12,8 @@ let database: any;
  * Connects to mongodb server
  */
 async function connect() {
+  logger.debug(`Connecting to mongodb with ${uri}`);
+
   try {
     const connection = await client.connect();
     database = connection.db('zHomeMedia');
