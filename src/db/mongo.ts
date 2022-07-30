@@ -17,7 +17,7 @@ async function connect() {
   try {
     const connection = await client.connect();
     database = connection.db('zHomeMedia');
-    logger.info('Connected to mongodb');
+    logger.info('Successfully connected to mongodb');
   } catch (e) {
     logger.error(`Couldn't connect to database ${e}`);
   }
