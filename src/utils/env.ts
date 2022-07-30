@@ -14,4 +14,5 @@ export default {
   MONGO_PASSWORD: process.env.MONGO_PASSWORD || 'must change this!!!',
   MONGO_DATA_DIR: process.env.MONGO_DATA_DIR || './data',
   STORAGE: process.env.STORAGE || './storage',
+  LOG_LEVEL: process.env.LOG_LEVEL || 'error',
 };
