@@ -1,6 +1,8 @@
 # .circleci/config.yml
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@3.2.3
 jobs:
   build:
     machine:
@@ -10,3 +12,8 @@ jobs:
       - run: sudo apt-get update
       - run: |
             docker-compose up --build --abort-on-container-exit api-tests
+      - codecov/upload
+workflows:
+  build-test:
+    jobs:
+      - build

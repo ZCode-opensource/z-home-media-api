@@ -12,13 +12,16 @@ let database: any;
  * Connects to mongodb server
  */
 async function connect() {
+  logger.debug(`Connecting to mongodb with: ${uri}`);
+
   try {
     const connection = await client.connect();
     database = connection.db('zHomeMedia');
-    logger.debug(`Connecting to mongodb with: ${uri}`);
     logger.info('Successfully connected to mongodb');
   } catch (e) {
     logger.error(`Couldn't connect to database ${e}`);
+    process.exitCode = 1;
+    process.exit();
   }
 }
 

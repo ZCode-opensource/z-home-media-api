@@ -14,7 +14,7 @@ services:
     image: "redis:alpine"
   api:
     build: .
-    image: zhomemedia
+    image: zhomemedia-api
     environment:
       DEVELOPMENT: false
       MONGO_HOST: mongo
@@ -33,7 +33,7 @@ services:
       - redis
   api-tests:
     build: .
-    image: zhomemedia
+    image: zhomemedia-api
     environment:
       DEVELOPMENT: true
       MONGO_HOST: mongo
@@ -41,6 +41,8 @@ services:
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       REDIS_SERVER: redis
       LOG_LEVEL: ${LOG_LEVEL}
+    volumes:
+      - ./coverage:/~/zhomemedia/coverage
     command: dockerize
         -wait tcp://mongo:27017 -wait tcp://redis:6379 -timeout 10s
         sh -c "yarn test"
