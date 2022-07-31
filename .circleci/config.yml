@@ -4,7 +4,7 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@3.2.3
 jobs:
-  tests:
+  build:
     machine:
       image: ubuntu-2004:2022.07.1
     steps:
@@ -14,6 +14,6 @@ jobs:
             docker-compose up --build --abort-on-container-exit api-tests
       - codecov/upload
 workflows:
-  tests-workflow:
+  build-test:
     jobs:
-      - tests
+      - build

@@ -12,6 +12,10 @@ const config: InitialOptionsTsJest = {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   collectCoverage: true,
+  coverageReporters: [
+    'text',
+    'cobertura',
+  ],
 };
 
 export default config;
