@@ -12,6 +12,8 @@ jobs:
       - run: sudo apt-get update
       - run: |
             docker-compose up --build --abort-on-container-exit api-tests
+      - store_artifacts:
+          path: coverage
       - codecov/upload:
           file: coverage/coverage-final.json
 workflows:
