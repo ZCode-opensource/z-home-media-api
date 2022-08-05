@@ -28,7 +28,7 @@ beforeAll(async () => {
           fs.readFileSync(
               `${__dirname}/../../tests_resources/test_video.mkv`,
           ),
-          'test_video.mkv',
+          'test_videos.mkv',
       ).expect(200);
   expect(response.type).toEqual('application/json');
   expect(response.body).toEqual(
