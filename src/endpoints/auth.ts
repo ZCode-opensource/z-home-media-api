@@ -62,11 +62,6 @@ auth.get('/logout', function(req, res) {
 });
 
 auth.get('/info', function(req, res) {
-  if (req.session.userId === undefined) {
-    res.status(400).send('Invalid credentials');
-    return;
-  }
-
   res.json({user: req.session.user, profile: req.session.profile});
 });
 

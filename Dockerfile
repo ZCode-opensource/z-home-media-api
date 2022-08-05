@@ -8,6 +8,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN mkdir -p ~/zhomemedia
+RUN mkdir -p /storage
 
 WORKDIR ~/zhomemedia
 

@@ -45,9 +45,22 @@ videos.get('/thumb/:videoId', function(req: Request, res: Response) {
   const videoId = req.params.videoId;
   const db = getDb();
 
+  let objId;
+  try {
+    objId = new ObjectId(videoId);
+  } catch (error) {
+    res.status(400).send('Invalid video id');
+    return;
+  }
+
   db.collection('videos')
-      .findOne({_id: new ObjectId(videoId)})
+      .findOne({_id: objId})
       .then((result: any) => {
+        if (result === null) {
+          res.status(404).send('Video not found');
+          return;
+        }
+
         const img = fs.readFileSync(
             `${process.env.STORAGE}/videos${result.path}/thumbs/${videoId}`,
         );
