@@ -1,4 +1,5 @@
 import express from 'express';
+import env from '../utils/env.js';
 import fileUpload from 'express-fileupload';
 import fs from 'fs';
 import {spawn} from 'child_process';
@@ -36,7 +37,7 @@ video.get('/:videoId', function(req, res) {
       .findOne({_id: new ObjectId(videoId)})
       .then((result: any) => {
         const videoPath =
-            `${process.env.STORAGE}/videos${result.path}/videos/${videoId}`;
+            `${env.STORAGE}/videos${result.path}/videos/${videoId}`;
 
         const videoSize = fs.statSync(videoPath).size;
         const CHUNK_SIZE = 10 ** 6;
@@ -59,7 +60,7 @@ video.post('/upload', function(req, res) {
   if (req.files !== undefined) {
     try {
       const video = req.files.myFile as fileUpload.UploadedFile;
-      const tempDir = process.env.STORAGE + '/temp';
+      const tempDir = env.STORAGE + '/temp';
 
       /** Check if temp dir exists, if it doesn't, create one */
       if (!fs.existsSync(tempDir)) {
@@ -73,7 +74,7 @@ video.post('/upload', function(req, res) {
       const day = timestamp.getUTCDate();
 
       const relPath = `/${year}/${month}/${day}`;
-      const path = `${process.env.STORAGE}/videos${relPath}`;
+      const path = `${env.STORAGE}/videos${relPath}`;
 
       if (!fs.existsSync(path + '/videos')) {
         fs.mkdirSync(path + '/videos', {recursive: true});
@@ -94,7 +95,7 @@ video.post('/upload', function(req, res) {
           tempDir + '/' + video.name,
         ];
 
-        const proc = spawn(process.env.FFPROBE as string, args);
+        const proc = spawn(env.FFPROBE as string, args);
         let output = '';
 
         proc.stdout.setEncoding('utf8');
@@ -241,7 +242,7 @@ async function encodeVideo(
     path + '/videos/' + videoId,
   ];
 
-  const proc = spawn(process.env.FFMPEG as string, args);
+  const proc = spawn(env.FFMPEG as string, args);
   let stderr = '';
 
   // For some reason ffmpeg outputs always to stderr
@@ -287,7 +288,7 @@ async function createThumbnail(videoId: string, path: string) {
     path + '/thumbs/' + videoId,
   ];
 
-  const proc = spawn(process.env.FFMPEG as string, args);
+  const proc = spawn(env.FFMPEG as string, args);
   let stderr = '';
 
   for await (const chunk of proc.stderr) {
