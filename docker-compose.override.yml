@@ -1,0 +1,6 @@
+version: '3.9'
+
+services:
+  mongo:
+    volumes:
+      - ${MONGO_DATA_DIR}:/data/db

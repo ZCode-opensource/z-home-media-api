@@ -1,7 +1,6 @@
 import app, {redisClient} from '../app';
 import supertest from 'supertest';
 import * as mongodb from '../db/mongo.js';
-// import logger from '../utils/logger.js';
 
 beforeAll(async () => {
   await mongodb.connect();
@@ -16,7 +15,20 @@ describe('Test auth without credentials', () => {
   });
 });
 
-describe('Test auth with bad credentials', () => {
+describe('Test auth with correct user but wrong password', () => {
+  it('It should return a 400 status code', async () => {
+    const response = await supertest(app)
+        .post('/api/auth')
+        .send({
+          user: 'admin',
+          password: 'bad password',
+        })
+        .expect(400);
+    expect((response.error as any).text).toEqual('Invalid credentials');
+  });
+});
+
+describe('Test auth with wrong user and password', () => {
   it('It should return a 400 status code', async () => {
     const response = await supertest(app)
         .post('/api/auth')
@@ -71,6 +83,26 @@ describe('Test get logged user info', () => {
         .expect(200);
     expect(response.type).toEqual('application/json');
     expect(response.body).toEqual({'profile': '1', 'user': 'admin'});
+  });
+});
+
+describe('Test logout', () => {
+  it('should return a 200 status code', async () => {
+    const response = await supertest(app)
+        .post('/api/auth')
+        .send({
+          user: 'admin',
+          password: 'admin',
+        })
+        .expect(200);
+
+    expect(response.headers).toHaveProperty('set-cookie');
+    const cookies = response.headers['set-cookie'].pop().split(';')[0];
+
+    await supertest(app)
+        .get('/api/auth/logout')
+        .set('Cookie', [cookies])
+        .expect(200);
   });
 });
 

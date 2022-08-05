@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import fileUpload from 'express-fileupload';
 import fs from 'fs';
@@ -37,7 +36,7 @@ video.get('/:videoId', function(req, res) {
       .findOne({_id: new ObjectId(videoId)})
       .then((result: any) => {
         const videoPath =
-          `${process.env.STORAGE}/videos${result.path}/videos/${videoId}`;
+            `${process.env.STORAGE}/videos${result.path}/videos/${videoId}`;
 
         const videoSize = fs.statSync(videoPath).size;
         const CHUNK_SIZE = 10 ** 6;
@@ -57,13 +56,8 @@ video.get('/:videoId', function(req, res) {
 });
 
 video.post('/upload', function(req, res) {
-  try {
-    if (!req.files) {
-      res.send({
-        status: false,
-        message: 'No file uploaded',
-      });
-    } else {
+  if (req.files !== undefined) {
+    try {
       const video = req.files.myFile as fileUpload.UploadedFile;
       const tempDir = process.env.STORAGE + '/temp';
 
@@ -74,24 +68,9 @@ video.post('/upload', function(req, res) {
 
       const timestamp = new Date();
 
-      /* Check and create storage directories */
       const year = timestamp.getUTCFullYear();
       const month = timestamp.getUTCMonth() + 1;
       const day = timestamp.getUTCDate();
-      // let path = `${process.env.STORAGE}/videos/${year}`;
-
-      /*
-      if (!fs.existsSync(path)) fs.mkdirSync(path);
-      path += `/${month}`;
-      if (!fs.existsSync(path)) fs.mkdirSync(path);
-      path += `/${day}`;
-      if (!fs.existsSync(path)) fs.mkdirSync(path);
-
-      Videos directory
-      if (!fs.existsSync(path + '/videos')) fs.mkdirSync(path + '/videos');
-      Thumbs directory
-      if (!fs.existsSync(path + '/thumbs')) fs.mkdirSync(path + '/thumbs');
-      */
 
       const relPath = `/${year}/${month}/${day}`;
       const path = `${process.env.STORAGE}/videos${relPath}`;
@@ -125,6 +104,12 @@ video.post('/upload', function(req, res) {
 
         proc.on('close', function() {
           const json = JSON.parse(output);
+
+          if (Object.entries(json).length === 0) {
+            res.status(400).send('File not supported.');
+            return;
+          }
+
           const fpsArray = json.streams[0].avg_frame_rate.split('/');
           const fps = parseInt(fpsArray[0]) / parseInt(fpsArray[1]);
 
@@ -142,19 +127,85 @@ video.post('/upload', function(req, res) {
               })
               .then((object: any) => {
                 const videoId = object.insertedId.toString();
-                encodeVideo(tempDir, video.name, videoId, path);
 
-                res.send({
-                  status: true,
-                  message: 'File is uploaded',
-                });
+                if (video.size < 5000000) {
+                  encodeVideo(tempDir, video.name, videoId, path).then(() => {
+                    logger.debug('encoding finished');
+
+                    fs.unlinkSync(tempDir + '/' + video.name);
+                    logger.debug('Temp file removed');
+
+                    createThumbnail(videoId, path).then(() => {
+                      logger.debug('thumbnail created');
+
+                      db.collection('videos')
+                          .updateOne(
+                              {_id: new ObjectId(videoId)},
+                              {$set: {status: 2}},
+                          )
+                          .then(() => {
+                            logger.debug('Video status changed to 2');
+
+                            res.send({
+                              status: true,
+                              videoId: videoId,
+                              message: 'File was uploaded',
+                            });
+                          });
+                    }).catch((err) => {
+                      logger.error(err);
+                    });
+
+                    return;
+                  }).catch((err) => {
+                    logger.debug(err);
+                    res.status(500).send(err);
+                  });
+
+                  return;
+                } else {
+                  encodeVideo(tempDir, video.name, videoId, path).then(() => {
+                    logger.debug('encoding finished');
+
+                    fs.unlinkSync(tempDir + '/' + video.name);
+                    logger.debug('Temp file removed');
+
+                    createThumbnail(videoId, path).then(() => {
+                      logger.debug('thumbnail created');
+
+                      db.collection('videos')
+                          .updateOne(
+                              {_id: new ObjectId(videoId)},
+                              {$set: {status: 2}},
+                          )
+                          .then(() => {
+                            logger.debug('Video status changed to 2');
+                          });
+                    }).catch((err) => {
+                      logger.error(err);
+                    });
+                  }).catch((err) => {
+                    logger.error(err);
+                  });
+
+                  res.send({
+                    status: true,
+                    videoId: videoId,
+                    message: 'File was uploaded',
+                  });
+                }
               });
         });
       });
+
+      return;
+    } catch (err) {
+      res.status(500).send(err);
+      return;
     }
-  } catch (err) {
-    res.status(500).send(err);
   }
+
+  res.status(400).send('No attachments found');
 });
 
 /**
@@ -164,7 +215,7 @@ video.post('/upload', function(req, res) {
  * @param {string} videoId Id of video in the database
  * @param {string} path Path where the output file should go
  */
-function encodeVideo(
+async function encodeVideo(
     tempDir: string,
     filename: string,
     videoId: string,
@@ -191,28 +242,26 @@ function encodeVideo(
   ];
 
   const proc = spawn(process.env.FFMPEG as string, args);
+  let stderr = '';
 
-  proc.stdout.on('data', function(_data) {
-  });
+  // For some reason ffmpeg outputs always to stderr
+  for await (const chunk of proc.stderr) {
+    stderr += chunk;
+  }
 
-  proc.stderr.setEncoding('utf8');
-  proc.stderr.on('data', function(data) {
-    logger.error(data);
-  });
+  const promise = new Promise((resolve, reject) => {
+    proc.on('error', reject);
 
-  proc.on('close', function() {
-    logger.debug('encoding finished');
-
-    fs.unlink(tempDir + '/' + filename, (err) => {
-      if (err) {
-        console.error(err);
-        return;
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve(stderr);
+      } else {
+        reject(stderr);
       }
-
-      logger.debug('Temp file removed');
-      createThumbnail(videoId, path);
     });
   });
+
+  return promise;
 }
 
 /**
@@ -220,7 +269,7 @@ function encodeVideo(
  * @param {string} videoId Id of video in the database
  * @param {string} path path where to store thumbnail
  */
-function createThumbnail(videoId: string, path: string) {
+async function createThumbnail(videoId: string, path: string) {
   logger.debug('creating thumbnail');
 
   const args = [
@@ -239,33 +288,25 @@ function createThumbnail(videoId: string, path: string) {
   ];
 
   const proc = spawn(process.env.FFMPEG as string, args);
+  let stderr = '';
 
-  proc.stdout.on('data', function(data) {
-    console.debug(data);
+  for await (const chunk of proc.stderr) {
+    stderr += chunk;
+  }
+
+  const promise = new Promise((resolve, reject) => {
+    proc.on('error', reject);
+
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve(stderr);
+      } else {
+        reject(stderr);
+      }
+    });
   });
 
-  proc.stderr.setEncoding('utf8');
-  proc.stderr.on('data', function(_data) {
-  });
-
-  proc.on('close', function() {
-    console.debug('thumbnail created');
-
-    const db = getDb();
-
-    db.collection('videos')
-        .updateOne(
-            {
-              _id: new ObjectId(videoId),
-            },
-            {
-              $set: {status: 2},
-            },
-        )
-        .then(() => {
-          console.debug('Status changed to 2');
-        });
-  });
+  return promise;
 }
 
 export default video;
