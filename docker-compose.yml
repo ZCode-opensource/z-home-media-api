@@ -16,7 +16,7 @@ services:
     build: .
     image: zhomemedia-api
     environment:
-      DEVELOPMENT: false
+      DEVELOPMENT: "false"
       MONGO_HOST: mongo
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
@@ -35,7 +35,7 @@ services:
     build: .
     image: zhomemedia-api
     environment:
-      DEVELOPMENT: true
+      DEVELOPMENT: "true"
       MONGO_HOST: mongo
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
