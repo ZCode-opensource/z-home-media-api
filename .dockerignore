@@ -1,7 +1,14 @@
+.git
 .directory
 .eslintrc.json
 .prettierrc
 .gitignore
 .vscode
+docker-compose.override.yml
+docker-compose.dev.yml
+docker-compose.yml
+Dockerfile
+README.md
 storage
 data
+node_modules
